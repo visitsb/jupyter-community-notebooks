@@ -6,3 +6,4 @@ This docker image contains below Jupyter [community](https://jupyter-docker-stac
 - [java-notebook](https://github.com/jbindinga/java-notebook)
 - ~~[gpu-jupyter](https://github.com/iot-salzburg/gpu-jupyter/)~~ (Needs some work hence not included)
 - [cgspatial-notebook](https://github.com/SCiO-systems/cgspatial-notebook)
+- [octave-notebook](https://github.com/visitsb/jupyter-octave)
