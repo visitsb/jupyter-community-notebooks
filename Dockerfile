@@ -21,42 +21,6 @@ RUN apt-get -y update && \
 
 USER $NB_UID
 
-##### JBINDINGA/JAVA-NOTEBOOK #####
-# https://raw.githubusercontent.com/jbindinga/java-notebook/master/Dockerfile
-USER root
-
-# Install dependencies
-RUN apt-get update && apt-get install -y \
-  software-properties-common \
-  curl
-
-# Install Zulu OpenJdk 11 (LTS)
-RUN apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 0xB1998361219BD9C9 \
-  && apt-add-repository 'deb http://repos.azulsystems.com/ubuntu stable main' \
-  && apt install -y zulu-11
-
-# Unpack and install the kernel
-RUN curl -L https://github.com/SpencerPark/IJava/releases/download/v1.3.0/ijava-1.3.0.zip > ijava-kernel.zip
-RUN unzip ijava-kernel.zip -d ijava-kernel \
-  && cd ijava-kernel \
-  && python3 install.py --sys-prefix
-
-# Install jupyter RISE extension.
-RUN pip install jupyter_contrib-nbextensions RISE \
-  && jupyter-nbextension install rise --py --system \
-  && jupyter-nbextension enable rise --py --system \
-  && jupyter contrib nbextension install --system \
-  && jupyter nbextension enable hide_input/main
-
-# Cleanup
-RUN rm ijava-kernel.zip
-
-# Add README.md
-# ADD "README.md" $HOME
-
-# Set user back to priviledged user.
-USER $NB_USER
-
 #####  UMSI-MADS/EDUCATION-NOTEBOOK #####
 # https://raw.githubusercontent.com/umsi-mads/education-notebook/master/Dockerfile
 USER root
@@ -447,7 +411,7 @@ RUN apt-get remove pkg-config -y
 
 ENV PROJ_LIB="/opt/conda/share/proj"
 
-RUN  conda install openjdk=8.0.192=h14c3975_1003 && \
+RUN  conda install --quiet --yes --channel conda-forge openjdk=11.0.1=hacce0ff_1021 && \
      conda install --quiet --yes 'r-rgdal' && \
      conda install --quiet --yes 'r-rgeos' && \
      conda install --quiet --yes 'r-geojsonio' && \
@@ -459,3 +423,39 @@ ADD https://raw.githubusercontent.com/SCiO-systems/cgspatial-notebook/master/lib
 RUN Rscript libraries.R
 
 ADD https://github.com/SCiO-systems/cgspatial-notebook/blob/master/extra/maxent.jar?raw=true /opt/conda/lib/R/library/dismo/java/maxent.jar
+
+##### JBINDINGA/JAVA-NOTEBOOK #####
+# https://raw.githubusercontent.com/jbindinga/java-notebook/master/Dockerfile
+USER root
+
+# Install dependencies
+RUN apt-get update && apt-get install -y \
+  software-properties-common \
+  curl
+
+# Install Zulu OpenJdk 11 (LTS)
+RUN apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 0xB1998361219BD9C9 \
+  && apt-add-repository 'deb http://repos.azulsystems.com/ubuntu stable main' \
+  && apt install -y zulu-11
+
+# Unpack and install the kernel
+RUN curl -L https://github.com/SpencerPark/IJava/releases/download/v1.3.0/ijava-1.3.0.zip > ijava-kernel.zip
+RUN unzip ijava-kernel.zip -d ijava-kernel \
+  && cd ijava-kernel \
+  && python3 install.py --sys-prefix
+
+# Install jupyter RISE extension.
+RUN pip install jupyter_contrib-nbextensions RISE \
+  && jupyter-nbextension install rise --py --system \
+  && jupyter-nbextension enable rise --py --system \
+  && jupyter contrib nbextension install --system \
+  && jupyter nbextension enable hide_input/main
+
+# Cleanup
+RUN rm ijava-kernel.zip
+
+# Add README.md
+# ADD "README.md" $HOME
+
+# Set user back to priviledged user.
+USER $NB_USER
