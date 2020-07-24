@@ -7,6 +7,20 @@ FROM $BASE_CONTAINER
 
 LABEL maintainer="Shanti Naik <visitsb@gmail.com>"
 
+##### VISITSB/JUPYTER-OCTAVE #####
+# https://raw.githubusercontent.com/visitsb/jupyter-octave/master/Dockerfile
+SHELL ["/bin/bash", "-o", "pipefail", "-c"]
+
+USER root
+
+RUN apt-get -y update && \
+    apt-get -y install octave octave-doc octave-info octave-htmldoc && \
+    apt-get -y install octave-control octave-image octave-io octave-optim octave-signal octave-statistics && \
+    pip install octave_kernel && \
+    apt-get -y clean && apt-get -y autoclean
+
+USER $NB_UID
+
 ##### JBINDINGA/JAVA-NOTEBOOK #####
 # https://raw.githubusercontent.com/jbindinga/java-notebook/master/Dockerfile
 USER root
@@ -445,17 +459,3 @@ ADD https://raw.githubusercontent.com/SCiO-systems/cgspatial-notebook/master/lib
 RUN Rscript libraries.R
 
 ADD https://github.com/SCiO-systems/cgspatial-notebook/blob/master/extra/maxent.jar?raw=true /opt/conda/lib/R/library/dismo/java/maxent.jar
-
-##### VISITSB/JUPYTER-OCTAVE #####
-# https://raw.githubusercontent.com/visitsb/jupyter-octave/master/Dockerfile
-SHELL ["/bin/bash", "-o", "pipefail", "-c"]
-
-USER root
-
-RUN apt-get -y update && \
-    apt-get -y install octave octave-doc octave-info octave-htmldoc && \
-    apt-get -y install octave-control octave-image octave-io octave-optim octave-signal octave-statistics && \
-    pip install octave_kernel && \
-    apt-get -y clean && apt-get -y autoclean
-
-USER $NB_UID
