@@ -379,51 +379,6 @@ RUN echo ' \
     fix-permissions $CONDA_DIR && \
     fix-permissions /home/$NB_USER
 
-##### SCIO-SYSTEMS/CGSPATIAL-NOTEBOOK #####
-# https://raw.githubusercontent.com/SCiO-systems/cgspatial-notebook/master/Dockerfile
-USER root
-
-RUN pip install shapely  && \
-    pip install geopandas  && \
-    pip install rasterio  && \
-    pip install pcse
-
-RUN apt-get update && apt-get install software-properties-common -y
-# Workaround since `ppa:ubuntugis/ppa` gives FAIL errors causing `bash pipefail` to abort; hence `|| exit 0` to let it proceed
-RUN (add-apt-repository ppa:ubuntugis/ppa && apt-get update) || exit 0
-RUN apt-get install gdal-bin -y && apt-get install libgdal-dev -y
-RUN export CPLUS_INCLUDE_PATH=/usr/include/gdal && export C_INCLUDE_PATH=/usr/include/gdal
-
-RUN pip install GDAL==$(gdal-config --version | awk -F'[.]' '{print $1"."$2}') && \
-    pip install jupyterhub==1.0.0
-
-RUN apt-get install unrar -y && \
-    apt-get install lftp -y && \
-    apt-get install libproj-dev -y && \
-    apt-get install libgdal-dev -y && \
-        apt-get install gdal-bin -y && \
-        apt-get install proj-bin -y
-
-RUN conda install -c conda-forge r-velox && \
-    conda install -c conda-forge r-rjava
-
-RUN apt-get remove pkg-config -y
-
-ENV PROJ_LIB="/opt/conda/share/proj"
-
-RUN  conda install --quiet --yes --channel conda-forge openjdk=11.0.1=hacce0ff_1021 && \
-     conda install --quiet --yes 'r-rgdal' && \
-     conda install --quiet --yes 'r-rgeos' && \
-     conda install --quiet --yes 'r-geojsonio' && \
-     conda install --quiet --yes 'r-spdep' && \
-     conda install --quiet --yes 'r-rcolorbrewer' && \
-     conda install --quiet --yes 'r-ncdf4'
-
-ADD https://raw.githubusercontent.com/SCiO-systems/cgspatial-notebook/master/libraries.R libraries.R
-RUN Rscript libraries.R
-
-ADD https://github.com/SCiO-systems/cgspatial-notebook/blob/master/extra/maxent.jar?raw=true /opt/conda/lib/R/library/dismo/java/maxent.jar
-
 ##### JBINDINGA/JAVA-NOTEBOOK #####
 # https://raw.githubusercontent.com/jbindinga/java-notebook/master/Dockerfile
 USER root
