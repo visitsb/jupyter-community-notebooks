@@ -45,10 +45,10 @@ WORKDIR /tmp
 
 # Our base is already a Jupyter Notebook, so just pick any extra packages for Fastai within our Jupyter environment
 # https://fastai1.fast.ai/install.html#jupyter-notebook-dependencies
-#
+
 # Also add kernelspec for ONEAPI_ENV
 # https://www.pugetsystems.com/labs/hpc/Intel-oneAPI-AI-Analytics-Toolkit----Introduction-and-Install-with-conda-2068/
-# 
+
 # TODO: -c conda-forge intel-aikit-modin takes ridiculously long time for conda to resolve; skipping `intel-aikit-modin` from environment
 RUN conda create -n $ONEAPI_ENV --quiet --yes -c intel intel-aikit-tensorflow intel-aikit-pytorch && \
     conda install -n $ONEAPI_ENV --quiet --yes nb_conda nb_conda_kernels ipykernel pip && \
@@ -76,10 +76,16 @@ RUN mkdir "$HOME/$FASTBOOK" && \
     fix-permissions "${CONDA_DIR}" && \
     fix-permissions "/home/${NB_USER}"
 
+# ADD --chown does not honor ARG, ENV
+# https://raw.githubusercontent.com/jupyter/docker-stacks/master/base-notebook/Dockerfile
+# ARG NB_USER="jovyan"
+# ARG NB_UID="1000"
+# ARG NB_GID="100"
+
 #COPY --chown=$NB_USER:$NB_GID download_testdata.py $HOME/$FASTAI
-ADD --chown=$NB_USER:$NB_GID https://raw.githubusercontent.com/fastai/docker-containers/master/fastai-build/download_testdata.py $HOME/$FASTAI
+ADD --chown=jovyan:100 https://raw.githubusercontent.com/fastai/docker-containers/master/fastai-build/download_testdata.py $HOME/$FASTAI
 #COPY --chown=$NB_USER:$NB_GID extract.sh $HOME/$FASTAI
-ADD --chown=$NB_USER:$NB_GID https://raw.githubusercontent.com/fastai/docker-containers/master/fastai-build/extract.sh $HOME/$FASTAI
+ADD --chown=jovyan:100 https://raw.githubusercontent.com/fastai/docker-containers/master/fastai-build/extract.sh $HOME/$FASTAI
 
 # Downloaded data, extract paths are as below-
 # download_testdata.py --> $HOME/$FASTAI/archive
@@ -412,7 +418,6 @@ RUN apt-get update && \
     tk tk-dev \
     jq && \
     rm -rf /var/lib/apt/lists/*
-
 
 USER $NB_UID
 
