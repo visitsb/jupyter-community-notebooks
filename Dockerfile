@@ -8,7 +8,7 @@ FROM $BASE_CONTAINER
 LABEL maintainer="Shanti Naik <visitsb@gmail.com>"
 
 # Fix DL4006
-SHELL ["/bin/bash", "-o", "pipefail", "-c"]
+SHELL ["/bin/bash", "--login", "-o", "pipefail", "-c"]
 
 ##### VISITSB/JUPYTER-FASTAI-INTEL-NOTEBOOk #####
 # https://raw.githubusercontent.com/visitsb/jupyter-fastai-intel-notebook/master/Dockerfile
@@ -52,12 +52,26 @@ WORKDIR /tmp
 # TODO: -c conda-forge intel-aikit-modin takes ridiculously long time for conda to resolve; skipping `intel-aikit-modin` from environment
 RUN conda create -n $ONEAPI_ENV --quiet --yes -c intel intel-aikit-tensorflow intel-aikit-pytorch && \
     conda install -n $ONEAPI_ENV --quiet --yes nb_conda nb_conda_kernels ipykernel pip && \
-    $CONDA_PREFIX/bin/python -m pip install --quiet fastai jupyter_contrib_nbextensions && \
+    $CONDA_PREFIX/bin/python -m pip install --quiet fastai jupyter_contrib_nbextensions ipywidgets && \
     $CONDA_PREFIX/bin/python -m ipykernel install --user --name $ONEAPI_ENV --display-name "Fastai (Intel® oneAPI)" && \
     conda update -n $ONEAPI_ENV --all --quiet --yes && \
     conda clean --all -f -y && \
     fix-permissions "${CONDA_DIR}" && \
     fix-permissions "/home/${NB_USER}"
+
+# ADD --chown does not honor ARG, ENV
+# https://raw.githubusercontent.com/jupyter/docker-stacks/master/base-notebook/Dockerfile
+# ARG NB_USER="jovyan"
+# ARG NB_UID="1000"
+# ARG NB_GID="100"
+
+# Copy kernel `logo` images to kernelspec
+# https://jupyter-client.readthedocs.io/en/stable/kernels.html#kernel-specs
+# `~/.local/share/jupyter/kernels` (Linux)
+# COPY --chown=$NB_USER:$NB_GID logo-32x32.png $HOME/.local/share/jupyter/kernels/$ONEAPI_ENV
+ADD --chown=jovyan:100 https://raw.githubusercontent.com/visitsb/jupyter-fastai-intel-notebook/master/logo-32x32.png $HOME/.local/share/jupyter/kernels/$ONEAPI_ENV
+# COPY --chown=$NB_USER:$NB_GID logo-64x64.png $HOME/.local/share/jupyter/kernels/$ONEAPI_ENV
+ADD --chown=jovyan:100 https://raw.githubusercontent.com/visitsb/jupyter-fastai-intel-notebook/master/logo-64x64.png $HOME/.local/share/jupyter/kernels/$ONEAPI_ENV
 
 # INSTALLED PACKAGE OF SCIKIT-LEARN CAN BE ACCELERATED USING DAAL4PY.
 # PLEASE SET 'USE_DAAL4PY_SKLEARN' ENVIRONMENT VARIABLE TO 'YES' TO ENABLE THE ACCELERATION.
@@ -75,12 +89,6 @@ RUN mkdir "$HOME/$FASTBOOK" && \
     mkdir "$HOME/$FASTAI" && \
     fix-permissions "${CONDA_DIR}" && \
     fix-permissions "/home/${NB_USER}"
-
-# ADD --chown does not honor ARG, ENV
-# https://raw.githubusercontent.com/jupyter/docker-stacks/master/base-notebook/Dockerfile
-# ARG NB_USER="jovyan"
-# ARG NB_UID="1000"
-# ARG NB_GID="100"
 
 #COPY --chown=$NB_USER:$NB_GID download_testdata.py $HOME/$FASTAI
 ADD --chown=jovyan:100 https://raw.githubusercontent.com/fastai/docker-containers/master/fastai-build/download_testdata.py $HOME/$FASTAI
